@@ -9,6 +9,7 @@
 
 #include "pqueue.h"
 
+using namespace std;
 using std::string;
 using std::vector;
 using std::unordered_map;
@@ -132,8 +133,9 @@ class graph {
       int vertex_id;
       double weight;
       // TODO:  add additional field here for cpaths
-      edge ( int vtx_id=0, double _weight=1.0) 
-        : vertex_id { vtx_id}, weight { _weight} 
+      double time;
+      edge ( int vtx_id=0, double _weight=1.0, double _time = 1.0) 
+        : vertex_id { vtx_id}, weight { _weight}, time{ _time } 
       { }
     };
 
@@ -209,6 +211,7 @@ class graph {
 
     };
 
+    vector<vertex_label> v_lab; //ADDED
 
     graph() {}
 
@@ -341,7 +344,7 @@ class graph {
      *         in the graph, they will be added.
      */
     bool add_edge(const string &src, const string &dest, 
-        double weight=1.0) {
+        double weight=1.0, double time=1.0) {
 
       int s_id, d_id;
 
@@ -367,8 +370,8 @@ class graph {
       else
         d_id = _name2id[dest];
 
-      vertices[s_id].outgoing.push_back(edge(d_id, weight));
-      vertices[d_id].incoming.push_back(edge(s_id, weight));
+      vertices[s_id].outgoing.push_back(edge(d_id, weight, time));
+      vertices[d_id].incoming.push_back(edge(s_id, weight, time));
 
       return true;
     }
@@ -395,33 +398,42 @@ class graph {
      */
     bool add_edge(const string &str) {
       std::stringstream ss(str);
-      string src, dest, junk, weight_str;
+      string src, dest, cost, time;
       double weight;
+      double duration;
 
       if(!(ss >> src))
         return false;
       if(!(ss >> dest))
         return false;
-      if(!(ss >> weight_str)){
+      if(!(ss >> cost)){
         // only two tokens: use default weight
         weight = 1.0;
       }
+      if(!(ss >> cost)){
+        duration = 1.0;
+      }
       else {
-        if(!(std::stringstream(weight_str) >> weight)){
+        if(!(std::stringstream(cost) >> weight)){
           // couldn't parse weight
           return false;
         }
 
         // TODO: add code to parse 2nd weight if it exists here
         //   for cpaths
-
-        if(ss >> junk){
-          // extra token?  format error
+        if(!(std::stringstream(time) >> duration)){
+          // couldn't parse duration
           return false;
         }
+
+
+        // if(ss >> junk){
+        //   // extra token?  format error
+        //   return false;
+        // }
       }
 
-      add_edge(src, dest, weight);
+      add_edge(src, dest, weight, duration);
 
       return true;
     }
@@ -572,6 +584,7 @@ class graph {
           v = e.vertex_id;
           if(report[v].state == UNDISCOVERED) {
             report[v].dist = report[u].dist + 1;
+            report[v].npaths = 1; //THIS WAS ADDED
             report[v].pred = u;
             report[v].state = DISCOVERED;
             // enqueue newly discovered vertex

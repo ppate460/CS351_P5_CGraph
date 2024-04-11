@@ -1,14 +1,14 @@
 
 #include <iostream>
-// #include "Graph.h"
-// #include "pqueue.h"
+#include "Graph.h"
+#include "pqueue.h"
 
 
 int main(int argc, char *argv[]){
     int n = 10;
 
 
-  // g.display();
+  g.display();
 
     if(argc == 2)
       sscanf(argv[1], "%d", &n);
