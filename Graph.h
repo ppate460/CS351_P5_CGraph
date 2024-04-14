@@ -133,7 +133,7 @@ class graph {
       int vertex_id;
       double weight;
       // TODO:  add additional field here for cpaths
-      double time;
+      double time; //Added Augmentation
       edge ( int vtx_id=0, double _weight=1.0, double _time = 1.0) 
         : vertex_id { vtx_id}, weight { _weight}, time{ _time } 
       { }
@@ -146,7 +146,7 @@ class graph {
       vector<edge> outgoing;
       vector<edge> incoming;
       string name;
-
+      vector<vector<int>> candidate_paths; // candidate paths?? 
       vertex ( int _id=0, string _name="") 
         : id { _id }, name { _name } 
       { }
@@ -210,8 +210,6 @@ class graph {
       { }
 
     };
-
-    vector<vertex_label> v_lab; //ADDED
 
     graph() {}
 
@@ -421,7 +419,7 @@ class graph {
 
         // TODO: add code to parse 2nd weight if it exists here
         //   for cpaths
-        if(!(std::stringstream(time) >> duration)){
+        if(!(std::stringstream(time) >> duration)){ //Added parsing of 2nd weight
           // couldn't parse duration
           return false;
         }
@@ -572,6 +570,7 @@ class graph {
       // By convention, we set the predecessor to itself.
       report[src].pred = src;
       report[src].state = DISCOVERED;
+      report[src].npaths = 1;
       q.push(src);
 
       while(!q.empty()) {
@@ -584,7 +583,7 @@ class graph {
           v = e.vertex_id;
           if(report[v].state == UNDISCOVERED) {
             report[v].dist = report[u].dist + 1;
-            report[v].npaths = 1; //THIS WAS ADDED
+            report[v].npaths++; //Added record of a path found
             report[v].pred = u;
             report[v].state = DISCOVERED;
             // enqueue newly discovered vertex
@@ -1034,8 +1033,35 @@ class graph {
       if(has_cycle() || target < 0 || target >= num_nodes())
         return false;
 
-      // your code here!
+      vertex target_vertex = vertices[target]; //Getting the struct vertex of the target
+      string name_paths = " "; 
+
+      
+      for(edge &e : target_vertex.incoming){    //Iterate over all incoming edges to target
+        int incoming_vertex_id = e.vertex_id; //Getting vertex id of incoming edge
+        vertex incoming_vertex = vertices[incoming_vertex_id];
+
+        helper_enum_paths(incoming_vertex, name_paths, id2name(target_vertex.id)); 
+
+      }
+
       return true;
+    }
+
+    string helper_enum_paths(vertex v, string &s, string target_name){
+      if(v.incoming.size() == 0){
+        string name = id2name(v.id);
+        s += name + " " + target_name + " ";
+        return s;
+      }
+
+      for(edge &e : v.incoming){
+        string name = id2name(v.id);
+        helper_enum_paths(vertices[e.vertex_id], s, name);
+        s += target_name + " ";
+      }
+      
+      return s;
     }
 
 
