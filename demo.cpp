@@ -1,74 +1,20 @@
 
 #include <iostream>
-#include "Graph.h"
+#include "cpath.h"
 #include "pqueue.h"
 
+using namespace std;
 
 int main(){
-  graph g;
+  cpath g;
 
-  
-  g._add_edge("a b 2 4");
-  g._add_edge("a c 2 5");
-  g._add_edge("a d 7 8");
-  g._add_edge("b d ten two");
-  g._add_edge("a");
-  
-  
-  g.add_edge("a", "b");
-  g.add_edge("b", "a");
+  g.read_file("edges.txt");
 
+  cout<<"PATHS FROM 0 to 6: "<<endl;
+  g.cpaths(0, 6, 2.0);
+  cout<<endl;
 
-  
-  g.add_edge("b", "c");
-  g.add_edge("d", "a");
-  g.add_edge("b", "d");
-  g.add_edge("a", "b");
-  
-
-  g.display();
-
-  g.bfs(0 , g.v_lab);
-  g.disp_report(g.v_lab);
-
-  pqueue q(10, true);
-
-  double priorities [] = { 10, 9,  8, 11, 12, 13,  14, 6, 7, 8 };
-  //                       0   1   2   3   4   5    6  7  8  9
-  int n=10;
-
-  for(int i=0; i<n; i++) {
-      q.insert(i, priorities[i]);
-  }
-
-  int id;
-  double p;
-
-
-
-  q.change_priority(5, 4);
-  q.change_priority(8, 20);
-  q.change_priority(3, 5);
-
-  q.remove_by_id(2);
-
-  for(id=0; id<q.capacity(); id++) {
-      if( q.get_priority(id, p))
-          printf("(get_priority): id: %d ; p: %lf\n", id, p);
-      else
-          printf("(get_priority): no entry for id: %d\n", id);
-  }
-
-  printf("\n");
-
-  while(q.size()) {
-      q.delete_top(id, p);
-      printf("(delete_top): id: %d ; p: %lf\n", id, p);
-  }
-
-  printf("\n");
-  printf("size: %d\n", q.size());
-
+  g.display_edges_from_each_vertex();
 
   return 0;
 }
