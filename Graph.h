@@ -9,7 +9,6 @@
 
 #include "pqueue.h"
 
-using namespace std;
 using std::string;
 using std::vector;
 using std::unordered_map;
@@ -133,9 +132,8 @@ class graph {
       int vertex_id;
       double weight;
       // TODO:  add additional field here for cpaths
-      double time; //Added Augmentation
-      edge ( int vtx_id=0, double _weight=1.0, double _time = 1.0) 
-        : vertex_id { vtx_id}, weight { _weight}, time{ _time } 
+      edge ( int vtx_id=0, double _weight=1.0) 
+        : vertex_id { vtx_id}, weight { _weight} 
       { }
     };
 
@@ -146,7 +144,7 @@ class graph {
       vector<edge> outgoing;
       vector<edge> incoming;
       string name;
-      vector<vector<int>> candidate_paths; // candidate paths?? 
+
       vertex ( int _id=0, string _name="") 
         : id { _id }, name { _name } 
       { }
@@ -210,6 +208,7 @@ class graph {
       { }
 
     };
+
 
     graph() {}
 
@@ -342,7 +341,7 @@ class graph {
      *         in the graph, they will be added.
      */
     bool add_edge(const string &src, const string &dest, 
-        double weight=1.0, double time=1.0) {
+        double weight=1.0) {
 
       int s_id, d_id;
 
@@ -368,8 +367,8 @@ class graph {
       else
         d_id = _name2id[dest];
 
-      vertices[s_id].outgoing.push_back(edge(d_id, weight, time));
-      vertices[d_id].incoming.push_back(edge(s_id, weight, time));
+      vertices[s_id].outgoing.push_back(edge(d_id, weight));
+      vertices[d_id].incoming.push_back(edge(s_id, weight));
 
       return true;
     }
@@ -396,42 +395,33 @@ class graph {
      */
     bool add_edge(const string &str) {
       std::stringstream ss(str);
-      string src, dest, cost, time;
+      string src, dest, junk, weight_str;
       double weight;
-      double duration;
 
       if(!(ss >> src))
         return false;
       if(!(ss >> dest))
         return false;
-      if(!(ss >> cost)){
+      if(!(ss >> weight_str)){
         // only two tokens: use default weight
         weight = 1.0;
       }
-      if(!(ss >> cost)){
-        duration = 1.0;
-      }
       else {
-        if(!(std::stringstream(cost) >> weight)){
+        if(!(std::stringstream(weight_str) >> weight)){
           // couldn't parse weight
           return false;
         }
 
         // TODO: add code to parse 2nd weight if it exists here
         //   for cpaths
-        if(!(std::stringstream(time) >> duration)){ //Added parsing of 2nd weight
-          // couldn't parse duration
+
+        if(ss >> junk){
+          // extra token?  format error
           return false;
         }
-
-
-        // if(ss >> junk){
-        //   // extra token?  format error
-        //   return false;
-        // }
       }
 
-      add_edge(src, dest, weight, duration);
+      add_edge(src, dest, weight);
 
       return true;
     }
@@ -570,7 +560,6 @@ class graph {
       // By convention, we set the predecessor to itself.
       report[src].pred = src;
       report[src].state = DISCOVERED;
-      report[src].npaths = 1;
       q.push(src);
 
       while(!q.empty()) {
@@ -583,7 +572,6 @@ class graph {
           v = e.vertex_id;
           if(report[v].state == UNDISCOVERED) {
             report[v].dist = report[u].dist + 1;
-            report[v].npaths++; //Added record of a path found
             report[v].pred = u;
             report[v].state = DISCOVERED;
             // enqueue newly discovered vertex
@@ -1033,35 +1021,8 @@ class graph {
       if(has_cycle() || target < 0 || target >= num_nodes())
         return false;
 
-      vertex target_vertex = vertices[target]; //Getting the struct vertex of the target
-      string name_paths = " "; 
-
-      
-      for(edge &e : target_vertex.incoming){    //Iterate over all incoming edges to target
-        int incoming_vertex_id = e.vertex_id; //Getting vertex id of incoming edge
-        vertex incoming_vertex = vertices[incoming_vertex_id];
-
-        helper_enum_paths(incoming_vertex, name_paths, id2name(target_vertex.id)); 
-
-      }
-
+      // your code here!
       return true;
-    }
-
-    string helper_enum_paths(vertex v, string &s, string target_name){
-      if(v.incoming.size() == 0){
-        string name = id2name(v.id);
-        s += name + " " + target_name + " ";
-        return s;
-      }
-
-      for(edge &e : v.incoming){
-        string name = id2name(v.id);
-        helper_enum_paths(vertices[e.vertex_id], s, name);
-        s += target_name + " ";
-      }
-      
-      return s;
     }
 
 
@@ -1076,6 +1037,12 @@ class graph {
      *       and calls enum_paths(int, vector<string> &) above.
      */
     bool enum_paths(const string &target,  vector<string> &paths) {
+
+      if (paths.size() == 0) {
+        // cout << "Graph is empty" << endl;
+        return;
+      }
+
       int tgt;
       if((tgt=name2id(target)) == -1)
           return false;
@@ -1122,6 +1089,12 @@ class graph {
      *
      */
     bool dijkstraSCAN(int src, std::vector<vertex_label> &report) {
+
+      if (report.size() == 0) {
+        // cout << "Graph is empty" << endl;
+        return;
+      }
+
       int u, v;
       double min_d;
       int next_vertex;;
@@ -1196,6 +1169,11 @@ class graph {
      *   name (string) instead of ID.
      */
     bool dijkstraSCAN(const string src, std::vector<vertex_label> &report) {
+
+      if (report.size() == 0) {
+        // cout << "Graph is empty" << endl;
+        return;
+      }
       int s;
 
       if((s=name2id(src)) == -1)
@@ -1290,6 +1268,12 @@ class graph {
      *   name (string) instead of ID.
      */
     bool dijkstraHEAP(const string src, std::vector<vertex_label> &report) {
+
+      if (report.size() == 0) {
+        // cout << "Graph is empty" << endl;
+        return;
+      }
+
       int s;
 
       if((s=name2id(src)) == -1)
