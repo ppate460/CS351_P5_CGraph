@@ -14,6 +14,7 @@ using namespace std;
 #define DISCOVERED   'd'
 #define ACTIVE       'a'
 #define FINISHED     'f'
+#define MAX 9999999999.999
 
 class cpath {
 
@@ -244,7 +245,12 @@ class cpath {
             Path path;
             int path_index = 0;
             find_cpaths(src, dest, new_labels, path_index, path, q);
+
+            double best_time = MAX;
+            vector<Path> budget_paths;
+            Path best_path;
             
+            cout<<"ALL PATHS: "<<endl;
             while (!q.empty())
             {
                 Path p = q.top();
@@ -252,14 +258,40 @@ class cpath {
                 double time;
                 for(auto v : p){
                     cout<<id2name(v.id)<<" ";
-                    cost = v.cost;
                     time = v.time;
+                    cost = v.cost;
                 }
+
+                if(cost <= budget){
+                    budget_paths.push_back(p);
+                }
+
                 cout<<"Cost: "<<cost<<" Time: "<<time<<endl;
                 q.pop();
             }
-            
 
+            double time;
+            for(auto p : budget_paths){
+                for(auto v : p){
+                    time = v.time;
+                }
+
+                if(time < best_time){
+                    best_path = p;
+                }
+            }
+
+            if(budget_paths.size()==0){
+                cout<<"NO PATH FOR BUDGET"<<endl;
+                return;
+            }
+
+            cout<<"THE BEST PATH: "<<endl;
+
+                for(auto v : best_path){
+                    cout<<id2name(v.id)<<" ";
+                }
+                cout<<endl;
         }
 
         void find_cpaths(int src, int dest, Path& labels, int &path_index, Path& path, priority_queue<Path, vector<Path>, Compare>& q){
